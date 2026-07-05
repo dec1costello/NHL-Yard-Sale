@@ -1,17 +1,10 @@
+# 🏒 NHL Slowly Changing Dimensions
 
-
-
-
-
-# 🏒 NHL Ops Data Platform
-
-### A Production-Grade NHL Data Engineering Pipeline
+### A Production Grade NHL Data Engineering Pipeline
 
 [![Python](https://img.shields.io/badge/Python-3.10%2B-blue.svg)](https://www.python.org/)
 [![dbt](https://img.shields.io/badge/dbt-1.7.0-orange.svg)](https://www.getdbt.com/)
-[![Airflow](https://img.shields.io/badge/Airflow-2.11.0-blue.svg)](https://airflow.apache.org/)
 [![DuckDB](https://img.shields.io/badge/DuckDB-1.5.4-yellow.svg)](https://duckdb.org/)
-[![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
 ---
 
@@ -25,20 +18,14 @@
 - [Quick Start](#quick-start)
 - [Data Flow](#data-flow)
 - [Dimensional Models](#dimensional-models)
-- [Airflow Orchestration](#airflow-orchestration)
-- [Performance Metrics](#performance-metrics)
-- [Future Extensions](#future-extensions)
-- [About The Developer](#about-the-developer)
 
 ---
 
 ## 🎯 Overview
 
-This is a **production-ready NHL data platform** that mirrors what an NHL Hockey Operations department would maintain. It ingests official NHL API data, applies change detection, stores immutable bronze snapshots, and builds a dimensional warehouse with SCD Type 2 tracking for historical player analysis.
+This is a **production ready NHL data platform** that mirrors what an NHL Hockey Operations department would maintain. It ingests official NHL API data, applies change detection, stores immutable bronze snapshots, and builds a dimensional warehouse with SCD Type 2 tracking for historical player analysis.
 
-> "This is not a scraper project. This is a data platform."
-
-The pipeline demonstrates **software engineering best practices**, **data modeling excellence**, and **production-grade orchestration**—all with a focused scope that's realistic to complete and easy to explain in an interview.
+> The pipeline demonstrates **software engineering best practices**, **data modeling excellence**, and **production-grade orchestration** all with a focused scope that's realistic to complete and easy to explain in an interview.
 
 ---
 
@@ -54,15 +41,7 @@ The pipeline demonstrates **software engineering best practices**, **data modeli
 - **Layered architecture** (Bronze → DuckDB → dbt)
 - **SCD Type 2 dimensional modeling** for historical tracking
 - **Change detection** to avoid redundant storage
-- **Production orchestration** with Airflow
 - **Clean separation of concerns** (extract, load, state, transform)
-
----
-
-## 🏗️ Architecture
-
-
-
 
 ---
 
@@ -91,11 +70,7 @@ The pipeline demonstrates **software engineering best practices**, **data modeli
 - `roster_changes_log` table for audit trail
 - No external Parquet files for state → single source of truth
 
-### ⏰ Airflow Orchestration
-- Daily DAG runs at 6 AM UTC
-- Idempotent tasks with retry logic
-- Dockerized for consistent execution
-- Email notifications on success/failure
+
 
 ### ✅ Data Quality
 - 12 dbt tests all passing:
@@ -114,8 +89,6 @@ The pipeline demonstrates **software engineering best practices**, **data modeli
 | **Extraction** | Python 3.10+, Requests | NHL API client |
 | **Storage** | DuckDB, Parquet | Data warehouse & bronze layer |
 | **Transformations** | dbt-duckdb 1.7+ | Dimensional modeling |
-| **Orchestration** | Apache Airflow 2.11+ | Pipeline scheduling |
-| **Containerization** | Docker, Docker Compose | Consistent execution |
 
 
 ---
@@ -124,7 +97,6 @@ The pipeline demonstrates **software engineering best practices**, **data modeli
 
 ### Prerequisites
 - Python 3.10+
-- Docker Desktop
 - uv (or pip)
 
 ### Step 1: Clone and Set Up
@@ -154,82 +126,3 @@ print(f\"✅ {result['summary']['total_teams']} teams, {result['summary']['total
 cd dbt
 dbt run
 dbt test
-
-
-# start airflow
-
-# Start Airflow services
-docker-compose up -d
-
-# Access Airflow UI
-open http://localhost:8080  # Username: admin, Password: admin
-
-# Trigger the DAG manually
-# Click the play button on nhl_roster_pipeline
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-# Dir Structure
-
-        nhl-ops-data-platform/
-        │
-        ├── 📁 airflow/
-        │   └── 📁 dags/
-        │       └── roster_pipeline.py          # Airflow DAG
-        │
-        ├── 📁 config/
-        │   └── teams.txt                       # NHL team abbreviations
-        │
-        ├── 📁 data/
-        │   ├── 📁 bronze/
-        │   │   └── 📁 rosters/                 # Parquet files go here
-        │   ├── 📁 logs/                        # Pipeline logs
-        │   └── 📁 silver/                      # Silver layer outputs
-        │
-        ├── 📁 dbt/
-        │   ├── 📁 models/
-        │   │   ├── 📁 marts/
-        │   │   │   ├── dim_team.sql
-        │   │   │   ├── dim_player.sql
-        │   │   │   └── schema.yml
-        │   │   └── 📁 staging/
-        │   │       └── stg_rosters.sql
-        │   ├── dbt_project.yml                 # dbt configuration
-        │   └── profiles.yml                    # dbt profiles
-        │
-        ├── 📁 src/
-        │   ├── 📁 extract/
-        │   │   └── scraper.py                  # Web scraping logic
-        │   ├── 📁 compare/
-        │   │   └── hash_compare.py             # Change detection
-        │   ├── 📁 load/
-        │   │   ├── bronze.py                   # Bronze layer writes
-        │   │   └── duckdb_loader.py            # DuckDB operations
-        │   ├── 📁 utils/
-        │   │   └── logging.py                  # Logging utilities
-        │   ├── config.py                       # Configuration
-        │   └── cli.py                          # CLI entry point
-        │
-        ├── 📁 warehouse/
-        │   └── duckdb.db                       # DuckDB database file
-        │
-        ├── .env                                # Environment variables
-        ├── .gitignore
-        ├── docker-compose.yml                  # Airflow services
-        ├── Dockerfile                          # Airflow container
-        ├── pyproject.toml                      # Project dependencies
-        ├── setup.sh                            # Setup script
-        └── README.md                           # Documentation
