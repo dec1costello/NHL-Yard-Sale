@@ -5,7 +5,6 @@
 [![Python](https://img.shields.io/badge/Python-3.10%2B-blue.svg)](https://www.python.org/)
 [![dbt](https://img.shields.io/badge/dbt-1.7.0-orange.svg)](https://www.getdbt.com/)
 [![DuckDB](https://img.shields.io/badge/DuckDB-1.5.4-yellow.svg)](https://duckdb.org/)
-
 ---
 
 ## Overview
@@ -20,10 +19,8 @@ Rather than simply downloading today's roster, the pipeline captures historical 
 |---------|----------|
 | "Who was on the roster on opening night?" | Point in time queries via SCD2 |
 | "When did Caufield switch numbers" | Full player history tracking |
-| "How many players has COL used this season?" | Historical roster counts |
+| "How many players has CHI used this season?" | Historical roster counts |
 | "Are we wasting storage on unchanged rosters?" | Hash based change detection |
-
----
 
 ## 🚀 Key Features
 
@@ -37,21 +34,35 @@ Rather than simply downloading today's roster, the pipeline captures historical 
 | **✅ Idempotent pipeline** | Safe to run daily, no duplicate data |
 
 
+## Pipeline Breakdown
 
-## Quick Start
-```
-    # 1. Clone
-    git clone https://github.com/dec1costello/NHL-Yard-Sale.git
-    cd nhl-slowly-changing-dimensions
-    
-    # 2. Setup
-    uv venv && uv sync
-    
-    # 3. Run the pipeline
-    python run_pipeline.py
-    
-    # 4. Run dbt
-    cd dbt && dbt run && dbt test
-```
-> [!TIP]
-> Use `uv run` before any Python command to guarantee execution with the locked environment. This ensures consistent Python versions and dependency trees across all machines.
+run_pipeline.py kicks off the entire process by telling roster_api.py to scrape all 32 NHL teams. For each team, client.py handles the heavy lifting fetching the JSON roster data from the NHL API with automatic retries if anything fails.
+
+Once the raw JSON arrives, roster_api.py transforms it into a clean list of player records. Then state_manager.py steps in: it computes a unique hash of the roster and checks DuckDB for the previous version. If the hashes match, nothing has changed, so it skips the team entirely. If they differ, that means the roster has updated.
+
+When a change is detected, bronze.py writes an immutable snapshot as Parquet + JSON to a folder organized by season and team. duckdb_loader.py appends the new data to raw_rosters, and state_manager.py updates the stored hash for future comparisons. This cycle repeats for all 32 teams, leaving you with a complete, auditable historical record of every roster change.
+
+| Module | What It Does | Key Decision |
+|--------|-------------|--------------|
+| `client.py` | Generic HTTP client with retries, timeouts, and session management | Exponential backoff (2^attempt) for transient failures; single `_get()` method reused across all endpoints |
+| `roster_api.py` | Orchestrates full pipeline: fetch → parse → bronze → DuckDB → state | `scrape_and_load_all_teams()` is the single entry point; calls every module in sequence |
+| `state_manager.py` | Computes MD5 roster hash, checks DuckDB for previous hash, updates state | Hash-based change detection determines if bronze write is needed; state lives in DuckDB (not Parquet) |
+| `bronze.py` | Writes immutable Parquet snapshots + JSON + metadata; handles change detection | Partitioned storage `season=YYYY/team=XXX/run_*.parquet`; skips write if `force=False` and hash matches |
+| `duckdb_loader.py` | Appends roster data to `raw_rosters` table; manages schema initialization | Append-only loading; indexes on `team`, `season`, `run_id`, `player_id` |
+| `config.py` | Auto detects NHL season (2025 → 20252026); manages all paths | Season detection logic: July–September = previous season, October–June = current season |
+| `logging.py` | Structured logging with timestamps, levels, and file output | All modules share same logger; logs written to `data/logs/` |
+
+
+
+## DuckDB Tables
+| Table | Purpose | Updated When |
+|---------|----------------|----|
+| raw_rosters | Append only historical data |Every time load_roster() is called |
+| roster_state | Current hash per team |After each team is processed |
+| roster_changes_log | Audit trail of changes |Optional (called by log_change()) |
+| main_marts.dim_team | Team dimension |dbt run |
+| main_marts.dim_player | SCD Type 2 player history |dbt run |
+
+
+
+
