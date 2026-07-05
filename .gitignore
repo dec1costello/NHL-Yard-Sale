@@ -1,4 +1,3 @@
-@'
 # Python
 __pycache__/
 *.pyc
@@ -11,6 +10,7 @@ __pycache__/
 dist/
 build/
 *.whl
+src/__pycache__/
 
 # Virtual environments
 .venv/
@@ -26,6 +26,11 @@ uv.lock
 # Jupyter
 .ipynb_checkpoints/
 *.ipynb
+
+# Databases
+*.db
+*.sqlite
+*.sqlite3
 
 # Data outputs (VERY important for your project)
 data/
@@ -50,6 +55,7 @@ airflow/webserver_config.py
 dbt/target/
 dbt/dbt_packages/
 dbt/logs/
+dbt/profiles.yml  # Optional: remove if you want to share template
 
 # OS
 .DS_Store
@@ -95,4 +101,3 @@ htmlcov/
 .mypy_cache/
 .pytest_cache/
 .ruff_cache/
-'@ | Out-File -FilePath ".gitignore" -Encoding utf8 -Force
