@@ -18,8 +18,8 @@ Rather than simply downloading today's roster, the pipeline captures historical 
 | Problem | Solution |
 |---------|----------|
 | "Who was on the roster on opening night?" | Point in time queries via SCD2 |
-| "When did Caufield switch numbers" | Full player history tracking |
-| "How many players has CHI used this season?" | Historical roster counts |
+| "When did a player switch numbers" | Full player history tracking |
+| "How many players has Chicago used this season?" | Historical roster counts |
 | "Are we wasting storage on unchanged rosters?" | Hash based change detection |
 
 ## 🚀 Key Features
