@@ -1,0 +1,1 @@
+"""NHL Ops Data Platform - Source package."""

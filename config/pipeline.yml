@@ -1,0 +1,27 @@
+@'
+# NHL Pipeline Configuration
+season: 2025
+source: hockey-reference
+
+# Scraping settings
+scraping:
+  rate_limit_seconds: 1.2
+  max_retries: 3
+  timeout: 30
+
+# Storage settings
+storage:
+  format: parquet
+  compression: snappy
+  partition_by: [season, team]
+
+# Change detection
+change_detection:
+  enabled: true
+  hash_fields: [player, number, position]
+
+# Logging
+logging:
+  level: INFO
+  format: structured
+'@ | Out-File -FilePath "config\pipeline.yml" -Encoding utf8

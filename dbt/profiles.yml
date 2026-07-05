@@ -1,0 +1,8 @@
+nhl_ops:
+  target: dev
+  outputs:
+    dev:
+      type: duckdb
+      path: ../warehouse/duckdb.db
+      schema: main
+      threads: 4

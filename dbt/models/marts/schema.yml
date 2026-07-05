@@ -1,0 +1,53 @@
+version: 2
+
+models:
+  - name: stg_rosters
+    description: "Staging model for rosters"
+    columns:
+      - name: player_id
+        description: "Hockey Reference player ID"
+        tests:
+          - not_null
+      - name: full_name
+        description: "Player full name"
+        tests:
+          - not_null
+      - name: team
+        description: "Team abbreviation"
+        tests:
+          - not_null
+      - name: season
+        description: "NHL season"
+        tests:
+          - not_null
+
+  - name: dim_team
+    description: "Team dimension table"
+    columns:
+      - name: team_sk
+        description: "Surrogate key for team"
+        tests:
+          - unique
+          - not_null
+      - name: team_abbrev
+        description: "Team abbreviation"
+        tests:
+          - unique
+          - not_null
+
+  - name: dim_player
+    description: "Player dimension (SCD Type 2)"
+    columns:
+      - name: player_sk
+        description: "Surrogate key for player"
+        tests:
+          - unique
+          - not_null
+      - name: player_id
+        description: "Hockey Reference player ID"
+        tests:
+          - not_null
+      - name: is_current
+        description: "Whether this is the current version"
+        tests:
+          - not_null

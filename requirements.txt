@@ -1,0 +1,8 @@
+duckdb
+pandas
+requests
+beautifulsoup4
+python-dotenv
+pyarrow
+dbt-core
+dbt-duckdb
