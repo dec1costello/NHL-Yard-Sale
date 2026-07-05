@@ -18,10 +18,10 @@ Rather than simply downloading today's roster, the pipeline captures historical 
 
 | Problem | Solution |
 |---------|----------|
-| "Who was on the roster on opening night?" | Point-in-time queries via SCD2 |
-| "When did MacKinnon switch to #29?" | Full player history tracking |
+| "Who was on the roster on opening night?" | Point in time queries via SCD2 |
+| "When did Caufield switch numbers" | Full player history tracking |
 | "How many players has COL used this season?" | Historical roster counts |
-| "Are we wasting storage on unchanged rosters?" | Hash-based change detection |
+| "Are we wasting storage on unchanged rosters?" | Hash based change detection |
 
 ---
 
@@ -29,19 +29,19 @@ Rather than simply downloading today's roster, the pipeline captures historical 
 
 | Feature | Why It Matters |
 |---------|----------------|
-| **Hash-based change detection** | Skip unchanged rosters → save storage & time |
-| **Immutable bronze snapshots** | Complete audit trail, never overwrite |
-| **DuckDB warehouse** | Embedded analytics, zero infrastructure |
-| **SCD Type 2 modeling** | Full player history (team, number, position) |
-| **dbt tests** | 12 tests ensuring data quality |
-| **Idempotent pipeline** | Safe to run daily, no duplicate data |
+| **✅ Hash-based change detection** | Skip unchanged rosters → save storage & time |
+| **✅ Immutable bronze snapshots** | Complete audit trail, never overwrite |
+| **✅ DuckDB warehouse** | Embedded analytics, zero infrastructure |
+| **✅ SCD Type 2 modeling** | Full player history (team, number, position) |
+| **✅ dbt tests** | 12 tests ensuring data quality |
+| **✅ Idempotent pipeline** | Safe to run daily, no duplicate data |
 
 
 
 ## Quick Start
 ```
     # 1. Clone
-    git clone https://github.com/<username>/nhl-slowly-changing-dimensions.git
+    git clone https://github.com/dec1costello/NHL-Yard-Sale.git
     cd nhl-slowly-changing-dimensions
     
     # 2. Setup
@@ -53,5 +53,5 @@ Rather than simply downloading today's roster, the pipeline captures historical 
     # 4. Run dbt
     cd dbt && dbt run && dbt test
 ```
----
-
+> [!TIP]
+> Use `uv run` before any Python command to guarantee execution with the locked environment. This ensures consistent Python versions and dependency trees across all machines.
