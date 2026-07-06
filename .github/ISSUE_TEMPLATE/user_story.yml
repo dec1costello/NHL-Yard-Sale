@@ -1,0 +1,63 @@
+name: User Story
+description: Create a user story following INVEST principles
+title: "[Story] "
+labels: ["user-story"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## 🧩 User Story
+        A good user story is **small, valuable, negotiable, estimable, and testable (INVEST)**.
+        It defines *what is needed*, not *how it is built*.
+
+  - type: textarea
+    id: story
+    attributes:
+      label: User Story Statement
+      description: Use the standard format.
+      placeholder: |
+        As a [user / system / role],
+        I want [capability or action],
+        so that [benefit or outcome].
+    validations:
+      required: true
+
+  - type: textarea
+    id: value
+    attributes:
+      label: User Value
+      description: Why does this story matter? What value does it deliver?
+      placeholder: This matters because…
+    validations:
+      required: true
+
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance Criteria
+      description: Define observable, testable conditions.
+      value: |
+        - [ ] Condition 1
+        - [ ] Condition 2
+        - [ ] Condition 3
+    validations:
+      required: true
+
+  - type: textarea
+    id: scope
+    attributes:
+      label: Scope Notes
+      description: Clarify what is in-scope and out-of-scope to keep this story small.
+
+  - type: textarea
+    id: validation
+    attributes:
+      label: How This Can Be Validated
+      description: How do we confirm this story delivers its intended value?
+      placeholder: Metric change, behavior observed, artifact produced…
+
+  - type: textarea
+    id: questions
+    attributes:
+      label: Open Questions
+      description: Anything intentionally left open for discussion.

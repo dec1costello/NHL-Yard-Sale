@@ -1,0 +1,50 @@
+name: Task
+description: A concrete, executable unit of implementation work
+title: "[Task] "
+labels: ["task"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## 🛠️ Task
+        A task is a **specific unit of work** that contributes to a user story.
+        If it can’t reasonably be completed by one person, it’s probably too big.
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Task Description
+      description: Clearly describe the work to be done.
+      placeholder: Implement / refactor / configure…
+    validations:
+      required: true
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Context
+      description: Why does this task exist? What does it support?
+
+  - type: textarea
+    id: done
+    attributes:
+      label: Definition of Done
+      description: What must be true for this task to be considered complete?
+      value: |
+        - [ ] Implementation complete
+        - [ ] Tests or validation added
+        - [ ] Docs/comments updated if needed
+    validations:
+      required: true
+
+  - type: textarea
+    id: verification
+    attributes:
+      label: Verification
+      description: How can someone verify this task was completed correctly?
+
+  - type: textarea
+    id: risks
+    attributes:
+      label: Dependencies / Risks
+      description: Anything that could block or complicate this task.

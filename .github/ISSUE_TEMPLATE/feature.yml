@@ -1,0 +1,67 @@
+name: Feature
+description: A high-level capability that delivers meaningful user or system value
+title: "[Feature] "
+labels: ["feature"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## 🎯 Feature Overview
+        A feature represents a **coherent capability or outcome**.
+        Focus on *what becomes possible* — not implementation details.
+
+  - type: textarea
+    id: summary
+    attributes:
+      label: Feature Summary
+      description: Briefly describe the capability this feature introduces.
+      placeholder: This feature enables…
+    validations:
+      required: true
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem / Opportunity
+      description: What problem does this solve, or what opportunity does it unlock?
+      placeholder: Today, users/system cannot…
+    validations:
+      required: true
+
+  - type: input
+    id: beneficiaries
+    attributes:
+      label: Who Benefits
+      description: Who experiences the value? (users, internal teams, systems)
+      placeholder: End users, ML pipeline, analytics consumers…
+
+  - type: textarea
+    id: outcome
+    attributes:
+      label: Desired Outcome
+      description: Describe what should be true once this feature is complete.
+      placeholder: After this feature ships…
+    validations:
+      required: true
+
+  - type: textarea
+    id: success
+    attributes:
+      label: Success Criteria
+      description: How will we know this feature is successful?
+      placeholder: |
+        - Metric improves…
+        - Capability exists…
+        - Failure mode eliminated…
+
+  - type: textarea
+    id: constraints
+    attributes:
+      label: Constraints & Considerations
+      description: Known assumptions, risks, or limitations.
+
+  - type: textarea
+    id: discussion
+    attributes:
+      label: Notes for Discussion
+      description: Open questions, tradeoffs, or areas needing alignment.
