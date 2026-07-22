@@ -170,15 +170,7 @@ class BronzeLoader:
         result["wrote_bronze"] = True
         result["status"] = "success"
         
-        # 4. Load to DuckDB
-        if load_to_duckdb:
-            try:
-                rows = self.duckdb.load_roster(players)
-                result["loaded_to_duckdb"] = rows > 0
-                logger.info(f"✅ Loaded {rows} rows to DuckDB for {team}")
-            except Exception as e:
-                logger.error(f"Failed to load {team} to DuckDB: {e}")
-                result["loaded_to_duckdb"] = False
+  
         
         return result
     
