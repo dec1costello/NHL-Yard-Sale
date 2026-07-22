@@ -60,10 +60,10 @@ flowchart TB
 
 | Problem | Solution |
 |---------|----------|
-| ✅"Who was on the roster on opening night?" | Point in time queries via SCD2 |
-| ✅"When did a player switch numbers" | Full player history tracking |
-| ✅"How many players has Chicago used this season?" | Historical roster counts |
-| ❌"Are we wasting storage on unchanged rosters?" | Hash based change detection |
+| "Who was on the roster on opening night?" | Point in time queries via SCD2 |
+| "When did a player switch numbers" | Full player history tracking |
+| "How many players has Chicago used this season?" | Historical roster counts |
+| "Are we wasting storage on unchanged rosters?" | Hash based change detection |
 
 ## 🚀 Key Features
 - **Hash-based change detection**: Skip unchanged rosters → save storage & time
