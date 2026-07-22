@@ -60,20 +60,17 @@ flowchart TB
 
 | Problem | Solution |
 |---------|----------|
-| "Who was on the roster on opening night?" | Point in time queries via SCD2 |
-| "When did a player switch numbers" | Full player history tracking |
-| "How many players has Chicago used this season?" | Historical roster counts |
-| "Are we wasting storage on unchanged rosters?" | Hash based change detection |
+| ✅"Who was on the roster on opening night?" | Point in time queries via SCD2 |
+| ✅"When did a player switch numbers" | Full player history tracking |
+| ✅"How many players has Chicago used this season?" | Historical roster counts |
+| ❌"Are we wasting storage on unchanged rosters?" | Hash based change detection |
 
 ## 🚀 Key Features
-
-| Feature | Why It Matters |
-|---------|----------------|
-| **✅ Hash-based change detection** | Skip unchanged rosters → save storage & time |
-| **✅ Immutable bronze snapshots** | Complete audit trail, never overwrite |
-| **✅ DuckDB warehouse** | Embedded analytics, zero infrastructure |
-| **✅ SCD Type 2 modeling** | Full player history (team, number, position) |
-| **✅ dbt tests** | 12 tests ensuring data quality |
+- **Hash-based change detection**: Skip unchanged rosters → save storage & time
+- **Immutable bronze snapshots**: Complete audit trail, never overwrite
+- **DuckDB warehouse**: Embedded analytics, zero infrastructure
+- **SCD Type 2 modeling**: Full player history (team, number, position)
+- **dbt tests**: 12 tests ensuring data quality
 
 ## Pipeline Breakdown
 
@@ -116,18 +113,6 @@ When a change is detected, bronze.py writes an immutable snapshot as Parquet + J
 | `config.py` | Auto detects NHL season (2025 → 20252026); manages all paths | Season detection logic: July–September = previous season, October–June = current season |
 | `logging.py` | Structured logging with timestamps, levels, and file output | All modules share same logger; logs written to `data/logs/` |
 
-
-
-## DuckDB Tables
-| Table | Purpose | Key Columns |
-|-------|---------|-------------|
-| `raw_rosters` | Append-only historical data | team, season, run_id, player_id, player, number, position, roster_hash, ingestion_timestamp |
-| `roster_state` | Current state per team | team, season, current_hash, **last_polled** ⏰ (when checked), **last_changed** 🔄 (when data changed), player_count |
-| `roster_changes_log` | Audit trail of changes | run_id, team, changed, current_hash, previous_hash, timestamp |
-| `v_roster_monitoring` | Monitoring view | team, last_checked, last_changed, status, hours_since_check, days_since_change |
-| `main_marts.dim_team` | Team dimension | dbt run |
-| `main_marts.dim_player` | SCD Type 2 player history | dbt run |
-
 ```mermaid
 sequenceDiagram
     participant RP as Pipeline
@@ -161,3 +146,14 @@ sequenceDiagram
     end
     RA-->>RP: Complete
 ```
+
+
+## DuckDB Tables
+| Table | Purpose | Key Columns |
+|-------|---------|-------------|
+| `raw_rosters` | Append-only historical data | team, season, run_id, player_id, player, number, position, roster_hash, ingestion_timestamp |
+| `roster_state` | Current state per team | team, season, current_hash, **last_polled** ⏰ (when checked), **last_changed** 🔄 (when data changed), player_count |
+| `roster_changes_log` | Audit trail of changes | run_id, team, changed, current_hash, previous_hash, timestamp |
+| `v_roster_monitoring` | Monitoring view | team, last_checked, last_changed, status, hours_since_check, days_since_change |
+| `main_marts.dim_team` | Team dimension | dbt run |
+| `main_marts.dim_player` | SCD Type 2 player history | dbt run |
