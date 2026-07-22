@@ -23,35 +23,13 @@ class NHLRosterAPI:
         self.client = NHLAPIClient()
     
     def fetch_roster(self, team: str, season: str) -> Dict[str, Any]:
-        """
-        Fetch roster JSON from NHL API.
-        
-        Args:
-            team: Team abbreviation (e.g., 'COL')
-            season: Season in format '20252026'
-            
-        Returns:
-            Raw API response as dict
-        """
+        """Fetch roster JSON from NHL API."""
         logger.info(f"Fetching roster for {team} season {season}")
         return self.client.get_roster_by_season(team, int(season))
     
     def parse_player(self, player_data: Dict[str, Any], team: str, season: str, 
                      run_id: str, ingest_timestamp: str, position_type: str) -> Dict[str, Any]:
-        """
-        Parse a single player from API response into our schema.
-        
-        Args:
-            player_data: Raw player dict from API
-            team: Team abbreviation
-            season: NHL season
-            run_id: Unique run identifier
-            ingest_timestamp: UTC timestamp
-            position_type: 'forward', 'defenseman', 'goalie'
-            
-        Returns:
-            Structured player dict matching existing schema
-        """
+        """Parse a single player from API response into our schema."""
         # Extract fields - handle i18n {'default': 'value'} format
         first_name = player_data.get('firstName', {})
         last_name = player_data.get('lastName', {})
@@ -225,15 +203,27 @@ class NHLRosterAPI:
         # Compute hash
         roster_hash = state_manager.compute_roster_hash(players)
         
+        # Check if this is a change
+        current_state = state_manager.get_state(team, metadata["season_display"])
+        is_change = False
+        
+        if current_state and current_state.get('current_hash') != roster_hash:
+            is_change = True
+            logger.info(f"🔄 Change detected for {team}")
+        elif force:
+            is_change = True
+            logger.info(f"🔄 Force loading {team}")
+        elif not current_state:
+            is_change = True
+            logger.info(f"🔄 First time loading {team}")
+        
         # Check if bronze exists
         bronze_dir = self.config.bronze_path / f"season={metadata['season_display']}" / f"team={team}"
         bronze_exists = bronze_dir.exists() and list(bronze_dir.glob("*.parquet"))
         
-        # Write bronze
-        should_force = force or not bronze_exists
-        
+        # Write bronze only if change detected
         wrote_bronze = False
-        if should_force:
+        if force or not bronze_exists or is_change:
             result = bronze.write_roster(
                 players=players,
                 team=team,
@@ -245,32 +235,32 @@ class NHLRosterAPI:
             )
             wrote_bronze = bool(result)
         else:
-            current_state = state_manager.get_state(team, metadata["season_display"])
-            if current_state and current_state.get('current_hash') == roster_hash:
-                logger.info(f"⏭️ No changes for {team}")
-            else:
-                result = bronze.write_roster(
-                    players=players,
-                    team=team,
-                    season=metadata["season_display"],
-                    roster_hash=roster_hash,
-                    run_id=metadata["run_id"],
-                    raw_html=raw_json,
-                    force=True
-                )
-                wrote_bronze = bool(result)
+            logger.info(f"⏭️ Skipping bronze write for {team} (no changes)")
         
-        # Load to DuckDB
+        # Load to DuckDB (always load, it's append-only)
         rows_loaded = duckdb.load_roster(players)
         
-        # Update state
+        # Update state with change flag
         state_manager.update_state(
             team=team,
             season=metadata["season_display"],
             current_hash=roster_hash,
             run_id=metadata["run_id"],
-            player_count=len(players)
+            player_count=len(players),
+            is_change=is_change
         )
+        
+        # Log change if it happened
+        if is_change and current_state:
+            state_manager.log_change(
+                run_id=metadata["run_id"],
+                team=team,
+                season=metadata["season_display"],
+                changed=True,
+                current_hash=roster_hash,
+                previous_hash=current_state.get('current_hash'),
+                player_count=len(players)
+            )
         
         return {
             "team": team,
@@ -278,7 +268,8 @@ class NHLRosterAPI:
             "players": len(players),
             "hash": roster_hash,
             "wrote_bronze": wrote_bronze,
-            "loaded_to_duckdb": rows_loaded > 0
+            "loaded_to_duckdb": rows_loaded > 0,
+            "changed": is_change
         }
     
     def scrape_and_load_all_teams(self) -> Dict[str, Any]:
@@ -312,7 +303,8 @@ class NHLRosterAPI:
                     teams_written += 1
                 logger.info(
                     f"✅ {team}: {result['players']} players, "
-                    f"bronze_written={result.get('wrote_bronze', False)}"
+                    f"bronze_written={result.get('wrote_bronze', False)}, "
+                    f"changed={result.get('changed', False)}"
                 )
             except Exception as e:
                 logger.error(f"Failed to process {team}: {e}")

@@ -27,7 +27,7 @@ class DuckDBLoader:
         conn = self._get_connection()
         
         try:
-            # Raw rosters table
+            # Raw rosters table ONLY
             conn.execute("""
                 CREATE TABLE IF NOT EXISTS raw_rosters (
                     team VARCHAR,
@@ -53,35 +53,7 @@ class DuckDBLoader:
                 )
             """)
             
-            # State table
-            conn.execute("""
-                CREATE TABLE IF NOT EXISTS roster_state (
-                    team VARCHAR,
-                    season VARCHAR,
-                    current_hash VARCHAR,
-                    last_ingested TIMESTAMP,
-                    last_run_id VARCHAR,
-                    player_count INTEGER,
-                    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                    PRIMARY KEY (team, season)
-                )
-            """)
-            
-            # Change log table
-            conn.execute("""
-                CREATE TABLE IF NOT EXISTS roster_changes_log (
-                    run_id VARCHAR,
-                    team VARCHAR,
-                    season VARCHAR,
-                    changed BOOLEAN,
-                    current_hash VARCHAR,
-                    previous_hash VARCHAR,
-                    player_count INTEGER,
-                    timestamp TIMESTAMP
-                )
-            """)
-            
-            # Create indexes
+            # Create indexes for performance
             conn.execute("""
                 CREATE INDEX IF NOT EXISTS idx_raw_rosters_team_season 
                 ON raw_rosters(team, season)
@@ -141,39 +113,6 @@ class DuckDBLoader:
         except Exception as e:
             logger.error(f"Failed to load roster: {e}")
             raise
-        finally:
-            conn.close()
-    
-    def load_state(self, team: str, season: str, roster_hash: str, 
-                   run_id: str, player_count: int) -> None:
-        """Update state for a team."""
-        conn = self._get_connection()
-        
-        try:
-            conn.execute("""
-                INSERT OR REPLACE INTO roster_state 
-                (team, season, current_hash, last_ingested, last_run_id, player_count, updated_at)
-                VALUES (?, ?, ?, CURRENT_TIMESTAMP, ?, ?, CURRENT_TIMESTAMP)
-            """, [team, season, roster_hash, run_id, player_count])
-            
-            logger.info(f"✅ Updated state for {team}")
-            
-        finally:
-            conn.close()
-    
-    def log_change(self, run_id: str, team: str, season: str, changed: bool,
-                   current_hash: str, previous_hash: Optional[str], 
-                   player_count: int) -> None:
-        """Log a change detection event."""
-        conn = self._get_connection()
-        
-        try:
-            conn.execute("""
-                INSERT INTO roster_changes_log 
-                (run_id, team, season, changed, current_hash, previous_hash, player_count, timestamp)
-                VALUES (?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
-            """, [run_id, team, season, changed, current_hash, previous_hash, player_count])
-            
         finally:
             conn.close()
     
